@@ -46,12 +46,27 @@ const fetchFunFact = async (num) => {
 };
 
 app.get("/api/classify-number", async (req, res) => {
-    const num = parseInt(req.query.number, 10);
+    const { number } = req.query;
 
-    if (isNaN(num)) {
-        return res.status(400).json({ number: req.query.number, error: true });
+    // If the number parameter is missing, return a 400 error
+    if (!number) {
+        return res.status(400).json({
+            "number": "alphabet",
+            "error": true
+        });
     }
 
+    const num = parseInt(number, 10);
+
+    // If the parameter is not a valid number, return an error
+    if (isNaN(num)) {
+        return res.status(400).json({
+            "number": number,
+            "error": true
+        });
+    }
+
+    // Proceed with normal logic if the input is valid
     const properties = [];
     if (num % 2 !== 0) properties.push("odd");
     if (num % 2 === 0) properties.push("even");
@@ -59,11 +74,7 @@ app.get("/api/classify-number", async (req, res) => {
     if (isPerfect(num)) properties.push("perfect");
     if (isArmstrong(num)) properties.push("armstrong");
 
-    const digitSum = num
-        .toString()
-        .split("")
-        .reduce((acc, digit) => acc + parseInt(digit, 10), 0);
-
+    const digitSum = getDigitSum(num);
     const funFact = await fetchFunFact(num);
 
     res.json({
@@ -75,5 +86,6 @@ app.get("/api/classify-number", async (req, res) => {
         fun_fact: funFact,
     });
 });
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
